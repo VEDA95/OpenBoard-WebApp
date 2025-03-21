@@ -1,15 +1,16 @@
-import {createFileRoute} from '@tanstack/react-router';
+import {createFileRoute, useNavigate} from '@tanstack/react-router';
 import {useForm} from 'react-hook-form';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
 import type {ReactElement, FC} from 'react';
-import type {SubmitHandler} from 'react-hook-form';
-import type {FormDataOutput} from '@/lib/types/form';
+import type {SubmitHandler, FieldPath} from 'react-hook-form';
+import type {RegistrationFormData} from '@/lib/types/form';
 import type {ValidationErrors} from '@/lib/types/error';
 
 function RegistrationPage(): ReactElement<FC> {
-    const form = useForm<FormDataOutput>({
+    const navigate = useNavigate({from: '/auth/registration'});
+    const form = useForm<RegistrationFormData>({
         defaultValues: {
             username: '',
             email: '',
@@ -19,20 +20,22 @@ function RegistrationPage(): ReactElement<FC> {
             last_name: ''
         }
     });
-    const handleSubmit: SubmitHandler<FormDataOutput> = async (data: FormDataOutput): Promise<void> => {
+    const handleSubmit: SubmitHandler<RegistrationFormData> = async (data: RegistrationFormData): Promise<void> => {
         if((data.first_name as string).length === 0) delete data.first_name;
         if((data.last_name as string).length === 0) delete data.last_name;
 
-        data.type = 'session';
         const response: Response = await fetch('http://localhost:8080/auth/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
-            body: JSON.stringify(data),
-        })
+            body: JSON.stringify({...data, type: 'submission'}),
+        });
         const responseData: any = await response.json();
 
-        if(response.ok) return;
+        if(response.ok) {
+            await navigate({to: '/dashboard'});
+            return;
+        }
 
         for(const [key, value] of Object.entries(responseData.errors as ValidationErrors)) {
             if(key === 'type') continue;
@@ -41,7 +44,7 @@ function RegistrationPage(): ReactElement<FC> {
                 continue;
             }
 
-            form.setError(key, {message: value.err_value});
+            form.setError(key as FieldPath<RegistrationFormData>, {message: value.err_value});
         }
     };
 

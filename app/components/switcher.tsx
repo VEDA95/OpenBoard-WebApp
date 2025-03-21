@@ -38,7 +38,7 @@ export function Switcher({ items }: {items: Array<SwitcherItem>}): ReactElement<
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
-                        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
                         align="start"
                         side={isMobile ? "bottom" : "right"}
                         sideOffset={4}
@@ -52,7 +52,7 @@ export function Switcher({ items }: {items: Array<SwitcherItem>}): ReactElement<
                                 onClick={(): void => setActiveItem(item)}
                                 className="gap-2 p-2"
                             >
-                                <div className="flex size-6 items-center justify-center rounded-sm border">
+                                <div className="flex size-6 items-center justify-center rounded-xs border">
                                     <item.icon className="size-4 shrink-0" />
                                 </div>
                                 {item.name}
