@@ -1,5 +1,5 @@
-import {Outlet, ScrollRestoration, createRootRoute} from '@tanstack/react-router';
-import {createServerFn, Meta, Scripts} from '@tanstack/start';
+import { Outlet, createRootRoute, HeadContent, Scripts } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
 import {parseCookies, setCookie} from 'vinxi/http';
 import {ThemeProvider} from '@/components/theme-provider';
 import {clsx} from 'clsx';
@@ -30,9 +30,6 @@ export const Route = createRootRoute({
             {
                 name: 'viewport',
                 content: 'width=device-width, initial-scale=1',
-            },
-            {
-                title: 'TanStack Start Starter',
             }
         ],
         links: [
@@ -64,16 +61,16 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>): ReactEle
     const bodyClasses: string = clsx({
         'dark': uiTheme === 'dark',
         'light': uiTheme === 'light'
-    }, 'dark:bg-zinc-950', 'dark:text-zinc-50');
+    }, 'dark:bg-zinc-950', 'dark:text-zinc-50', 'overflow-y-hidden');
 
     return (
         <html>
             <head>
-                <Meta />
+                <HeadContent />
+                <title>Open Kanban Web App</title>
             </head>
             <body className={bodyClasses}>
                 {children}
-                <ScrollRestoration />
                 <Scripts />
             </body>
         </html>

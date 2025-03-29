@@ -6,9 +6,9 @@ import type { ReactElement, FC } from 'react';
 
 function DashboardPage(): ReactElement<FC> {
     return (
-        <SidebarProvider>
+        <SidebarProvider className="fixed top-0 inset-0">
             <AppSidebar variant="inset" />
-            <SidebarInset>
+            <SidebarInset className="overflow-y-scroll">
                 <SiteHeader />
                 <div className="flex flex-1 flex-col">
                     <div className="@container/main flex flex-1 flex-col gap-2">

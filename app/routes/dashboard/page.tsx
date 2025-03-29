@@ -1,8 +1,9 @@
 import {createFileRoute} from '@tanstack/react-router';
+import { authMiddleware } from '@/lib/auth';
 import { SectionCards } from '@/components/section-cards';
 import { ChartAreaInteractive } from '@/components/chart-area-interactive';
 import { DataTable } from '@/components/data-table';
-import data from '@/routes/data.json';
+import data from '@/dashboard/data.json';
 import type { ReactElement, FC } from 'react';
 
 function DashboardPage(): ReactElement<FC> {
@@ -18,5 +19,7 @@ function DashboardPage(): ReactElement<FC> {
 }
 
 export const Route = createFileRoute('/dashboard/page')({
+    beforeLoad: authMiddleware,
+    loader: ({context: {user}}) => user,
     component: DashboardPage,
 });

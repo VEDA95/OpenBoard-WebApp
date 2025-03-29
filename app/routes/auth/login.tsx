@@ -1,5 +1,6 @@
-import {createFileRoute, Link, useNavigate} from '@tanstack/react-router';
+import {createFileRoute, Link, useNavigate, redirect} from '@tanstack/react-router';
 import {useForm} from 'react-hook-form';
+import {checkUserAuthentication} from '@/lib/auth';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {Checkbox} from '@/components/ui/checkbox';
 import {Input} from '@/components/ui/input';
@@ -104,5 +105,12 @@ function Login(): ReactElement<FC> {
 }
 
 export const Route = createFileRoute('/auth/login')({
+    beforeLoad: async () => {
+        const user = await checkUserAuthentication();
+
+        if(user !== null) throw redirect({to: '/dashboard/page'});
+
+        return {user: null};
+    },
     component: Login,
 });
