@@ -1,10 +1,21 @@
-import {createFileRoute, Outlet, redirect} from '@tanstack/react-router';
+import { useEffect } from 'react';
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import useUserState from '@/lib/state/user';
+import { authMiddleware } from '@/lib/auth';
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import type { ReactElement, FC } from 'react';
+import type { GlobalUserState, SetUserCall } from '@/lib/state/user';
 
 function DashboardPage(): ReactElement<FC> {
+    const setUser = useUserState<SetUserCall>((state: GlobalUserState): SetUserCall => state.set);
+    const user = Route.useLoaderData();
+
+    useEffect(() => {
+        setUser(user);
+    }, []);
+
     return (
         <SidebarProvider className="fixed top-0 inset-0">
             <AppSidebar variant="inset" />
@@ -12,7 +23,7 @@ function DashboardPage(): ReactElement<FC> {
                 <SiteHeader />
                 <div className="flex flex-1 flex-col">
                     <div className="@container/main flex flex-1 flex-col gap-2">
-                        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                        <div className="flex flex-col h-full gap-4 p-4 md:gap-6 md:p-6">
                             <Outlet />
                         </div>
                     </div>
@@ -24,7 +35,10 @@ function DashboardPage(): ReactElement<FC> {
 
 export const Route = createFileRoute('/dashboard')({
     component: DashboardPage,
-    beforeLoad: async ({location: {pathname}}): Promise<void> => {
+    beforeLoad: async ({location: {pathname}}): Promise<any> => {
         if (pathname === '/dashboard') throw redirect({to: '/dashboard/page'});
-    }
+
+        return authMiddleware();
+    },
+    loader: ({context: {user}}) => user
 });
