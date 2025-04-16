@@ -16,7 +16,6 @@ export const checkUserAuthentication = createServerFn().handler(async () => {
     });
 
     if(userResponse.ok) return (await userResponse.json()).data;
-
     if(!cookies['open_board_session_remember_me']) return null;
 
     const refreshResponse: Response = await fetch('http://localhost:8080/auth/refresh', {

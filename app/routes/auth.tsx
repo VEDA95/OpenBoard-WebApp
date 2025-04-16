@@ -1,7 +1,7 @@
-import {createFileRoute, Outlet, redirect} from '@tanstack/react-router';
-import {GalleryVerticalEnd} from 'lucide-react';
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { DarkModeToggle } from '@/components/dark-mode-toggle';
+import { GalleryVerticalEnd } from 'lucide-react';
 import type { ReactElement, FC } from 'react';
-import {DarkModeToggle} from "@/components/dark-mode-toggle";
 
 function AuthPage(): ReactElement<FC> {
     return (
@@ -16,8 +16,7 @@ function AuthPage(): ReactElement<FC> {
             <div className="flex flex-col gap-4 p-6 md:p-10">
                 <div className="flex justify-center gap-2 md:justify-between">
                     <a href="#" className="flex items-center gap-2 font-medium">
-                        <div
-                            className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900">
                             <GalleryVerticalEnd className="size-4"/>
                         </div>
                         Acme Inc.
