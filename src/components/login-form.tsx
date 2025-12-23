@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, Link } from '@tanstack/react-router';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
 import {
@@ -68,12 +68,13 @@ export function LoginForm({ className, showRegisterLink = false, ...props }: Log
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
+                  <Link
+                    to="/auth/forgot-password"
                     className="ml-auto text-sm underline-offset-4 hover:underline"
+                    viewTransition
                   >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <Input
                   id="password"
