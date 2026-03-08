@@ -1,38 +1,51 @@
 import type { APIResponse } from '@appTypes/response';
-import type { GeneralSettingsResponse, AuthSettingsResponse, EmailSettingsResponse } from '@appTypes/settings';
+import type {
+  GeneralSettingsResponse,
+  AuthSettingsResponse,
+  EmailSettingsResponse,
+  PublicGeneralSettingsResponse,
+  PublicAuthSettingsResponse,
+  PublicEmailSettingsResponse
+} from '@appTypes/settings';
 
-export async function GETGeneralSettings(): Promise<APIResponse<GeneralSettingsResponse>> {
-  const response: Response = await fetch('http://localhost:8080/api/settings/general', {
+export async function GETGeneralSettings(publicSettings: boolean = false, headers?: Headers): Promise<APIResponse<GeneralSettingsResponse> | APIResponse<PublicGeneralSettingsResponse>> {
+  let url: string = 'http://localhost:8080/api/settings/general';
+
+  if (publicSettings) url += '/public';
+
+  const response: Response = await fetch(url, {
     method: 'GET',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: headers
   });
 
-  return await response.json() as APIResponse<GeneralSettingsResponse>;
+  return await response.json() as APIResponse<GeneralSettingsResponse> | APIResponse<PublicGeneralSettingsResponse>;
 }
 
-export async function GETAuthSettings(): Promise<APIResponse<AuthSettingsResponse>> {
-  const response: Response = await fetch('http://localhost:8080/api/settings/auth', {
+export async function GETAuthSettings(publicSettings: boolean = false, headers?: Headers): Promise<APIResponse<AuthSettingsResponse> | APIResponse<PublicAuthSettingsResponse>> {
+  let url: string = 'http://localhost:8080/api/settings/auth';
+
+  if (publicSettings) url += '/public';
+
+  const response: Response = await fetch(url, {
     method: 'GET',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: headers
   });
 
-  return await response.json() as APIResponse<AuthSettingsResponse>;
+  return await response.json() as APIResponse<AuthSettingsResponse> | APIResponse<PublicAuthSettingsResponse>;
 }
 
-export async function GETEmailSettings(): Promise<APIResponse<EmailSettingsResponse>> {
-  const response: Response = await fetch('http://localhost:8080/api/settings/email', {
+export async function GETEmailSettings(publicSettings: boolean = false, headers?: Headers): Promise<APIResponse<EmailSettingsResponse> | APIResponse<PublicEmailSettingsResponse>> {
+  let url: string = 'http://localhost:8080/api/settings/email';
+
+  if (publicSettings) url += '/public';
+
+  const response: Response = await fetch(url, {
     method: 'GET',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: headers
   });
 
-  return await response.json() as APIResponse<EmailSettingsResponse>;
+  return await response.json() as APIResponse<EmailSettingsResponse> | APIResponse<PublicEmailSettingsResponse>;
 }

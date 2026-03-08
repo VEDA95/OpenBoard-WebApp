@@ -3,10 +3,9 @@ import { Field, FieldLabel, FieldGroup } from '@components/ui/field';
 import { Input } from '@components/ui/input';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@components/ui/card';
 import { Button } from '@components/ui/button';
-import { cn } from '@lib/utils/cn';
 import type { ReactElement, FC, ComponentProps, FormEvent } from 'react';
 
-export function ForgotPasswordForm({ className, ...props }: ComponentProps<'div'>): ReactElement<FC> {
+export function ForgotPasswordForm(): ReactElement<FC> {
   const emailRef = useRef<HTMLInputElement>(null);
   const [disabled, setDisabled] = useState<boolean>(false);
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
@@ -15,7 +14,7 @@ export function ForgotPasswordForm({ className, ...props }: ComponentProps<'div'
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Reset Your Password</CardTitle>

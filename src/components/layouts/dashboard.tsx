@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from '@tanstack/react-router';
 import {
   SidebarProvider,
   SidebarInset,
@@ -39,7 +40,8 @@ import {
   IconNotification,
   IconUserCircle,
   IconCirclePlusFilled,
-  IconMail
+  IconMail,
+  IconSettings
 } from '@tabler/icons-react';
 import type { ReactElement, FC, PropsWithChildren, ComponentProps } from 'react';
 
@@ -150,6 +152,12 @@ DashBoardLayout.Sidebar = function ({ children, ...props }: ComponentProps<typeo
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard/settings">
+                      <IconSettings />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem>
                     <IconUserCircle />
                     Account

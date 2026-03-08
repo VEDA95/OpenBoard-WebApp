@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { useNavigate, Link } from '@tanstack/react-router';
-import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -16,18 +15,23 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { login } from '@lib/fetch/auth';
-import type { ReactElement, FC, FormEvent, ComponentProps } from 'react';
+import { initiateOAuthFlow } from '@lib/fetch/oauth';
+import type { ReactElement, FC, FormEvent } from 'react';
+import type { OAuthProvider } from '@appTypes/oauth';
 
-export interface LoginFormProps extends ComponentProps<'div'> {
+export interface LoginFormProps {
   showRegisterLink?: boolean;
+  oauthProviders?: OAuthProvider[];
 }
 
-export function LoginForm({ className, showRegisterLink = false, ...props }: LoginFormProps): ReactElement<FC> {
+export function LoginForm({ showRegisterLink = false, oauthProviders = [] }: LoginFormProps): ReactElement<FC> {
   const navigate = useNavigate();
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [disabled, setDisabled] = useState<boolean>(false);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     setDisabled(true);
@@ -43,8 +47,17 @@ export function LoginForm({ className, showRegisterLink = false, ...props }: Log
     })()
   };
 
+  const handleOAuthLogin = (providerId: string): void => {
+    // Store provider ID for the callback to use
+    localStorage.setItem('oauth_provider_id', providerId);
+    const callbackUrl = `${window.location.origin}/auth/oauth/callback`;
+    initiateOAuthFlow(providerId, callbackUrl);
+  };
+
+  const hasOAuthProviders = oauthProviders.length > 0;
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome</CardTitle>
@@ -53,52 +66,77 @@ export function LoginForm({ className, showRegisterLink = false, ...props }: Log
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="username">Username</FieldLabel>
-                <Input
-                  id="username"
-                  type="text"
-                  ref={usernameRef}
-                  disabled={disabled}
-                  placeholder="type username here..."
-                  required />
-              </Field>
-              <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Link
-                    to="/auth/forgot-password"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                    viewTransition
-                  >
-                    Forgot your password?
-                  </Link>
+          <div className="flex flex-col gap-6">
+            {hasOAuthProviders && (
+              <>
+                <div className="flex flex-col gap-3">
+                  {oauthProviders.map((provider) => (
+                    <Button
+                      key={provider.id}
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleOAuthLogin(provider.id)}
+                      disabled={disabled}
+                    >
+                      Continue with {provider.name}
+                    </Button>
+                  ))}
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  ref={passwordRef}
-                  disabled={disabled}
-                  required />
-              </Field>
-              <Field>
-                <Button type="submit" disabled={disabled}>Login</Button>
-                {showRegisterLink && (
-                  <FieldDescription className="text-center">
-                    Don&apos;t have an account? <a href="#">Sign up</a>
-                  </FieldDescription>
-                )}
-              </Field>
-            </FieldGroup>
-          </form>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+            <form onSubmit={handleSubmit}>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="username">Username</FieldLabel>
+                  <Input
+                    id="username"
+                    type="text"
+                    ref={usernameRef}
+                    disabled={disabled}
+                    placeholder="type username here..."
+                    required />
+                </Field>
+                <Field>
+                  <div className="flex items-center">
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <Link
+                      to="/auth/forgot-password"
+                      className="ml-auto text-sm underline-offset-4 hover:underline"
+                      viewTransition
+                    >
+                      Forgot your password?
+                    </Link>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    ref={passwordRef}
+                    disabled={disabled}
+                    required />
+                </Field>
+                <Field>
+                  <Button type="submit" disabled={disabled} className="w-full">Login</Button>
+                  {showRegisterLink && (
+                    <FieldDescription className="text-center">
+                      Don&apos;t have an account? <Link to="/auth/register" viewTransition>Sign up</Link>
+                    </FieldDescription>
+                  )}
+                </Field>
+              </FieldGroup>
+            </form>
+          </div>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
     </div>
   );
 }

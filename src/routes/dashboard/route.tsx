@@ -1,7 +1,11 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
-import { IconChartBar, IconDashboard, IconFolder, IconListDetails, IconUsers } from '@tabler/icons-react';
+import { createFileRoute, Outlet, Link } from '@tanstack/react-router';
+import { IconDashboard } from '@tabler/icons-react';
 import { SidebarMenuItem, SidebarMenuButton } from '@components/ui/sidebar';
 import { DashBoardLayout } from '@layouts/dashboard';
+import { ErrorBoundary } from '@components/ui/error-boundary';
+import { WorkspaceSelector } from '@components/workspace/WorkspaceSelector';
+import { CreateWorkspaceDialog } from '@components/workspace/CreateWorkspaceDialog';
+import { CreateBoardDialog } from '@components/board/CreateBoardDialog';
 import type { ReactElement, FC } from 'react';
 
 export const Route = createFileRoute('/dashboard')({
@@ -13,39 +17,22 @@ function AppLayout(): ReactElement<FC> {
     <DashBoardLayout>
       <DashBoardLayout.Sidebar>
         <SidebarMenuItem>
-          <SidebarMenuButton>
-            <IconDashboard />
-            <span>Dashboard</span>
+          <SidebarMenuButton asChild>
+            <Link to="/dashboard">
+              <IconDashboard />
+              <span>Dashboard</span>
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton>
-            <IconListDetails />
-            <span>Lifecycle</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton>
-            <IconChartBar />
-            <span>Analytics</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton>
-            <IconFolder />
-            <span>Projects</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton>
-            <IconUsers />
-            <span>Teams</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        <WorkspaceSelector />
       </DashBoardLayout.Sidebar>
       <DashBoardLayout.Window>
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </DashBoardLayout.Window>
+      <CreateWorkspaceDialog />
+      <CreateBoardDialog />
     </DashBoardLayout>
   );
 }
