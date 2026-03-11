@@ -14,11 +14,11 @@ import {
 } from '@components/ui/dropdown-menu';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { DeleteConfirmDialog } from '@components/ui/delete-confirm-dialog';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@components/ui/tooltip';
 import { KanbanCard } from './KanbanCard';
-import { CreateCardForm } from './CreateCardForm';
+import { CreateCardDialog } from './CreateCardForm';
 import { deleteList } from '@lib/fetch/lists';
 import { QueryKeys } from '@lib/queries/queryKeys';
-import { useKanbanStore } from '@lib/stores/kanban-store';
 import type { List } from '@appTypes/board';
 import { cn } from '@lib/utils/cn';
 
@@ -31,7 +31,7 @@ interface KanbanListProps {
 
 export function KanbanList({ list, boardId, isDragging, isOver }: KanbanListProps) {
   const queryClient = useQueryClient();
-  const { modal, openCreateCard, closeCreateCard } = useKanbanStore();
+  const [createCardOpen, setCreateCardOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const {
@@ -72,8 +72,6 @@ export function KanbanList({ list, boardId, isDragging, isOver }: KanbanListProp
     },
   });
 
-  const isCreatingCard = modal.createCardListId === list.id;
-
   return (
     <Card
       ref={setNodeRef}
@@ -84,15 +82,20 @@ export function KanbanList({ list, boardId, isDragging, isOver }: KanbanListProp
         isOver && 'ring-2 ring-primary'
       )}
     >
-      <CardHeader className="p-3 pb-2 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <button
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 hover:bg-accent rounded"
-          >
-            <IconGripVertical className="size-4 text-muted-foreground" />
-          </button>
+      <CardHeader className="px-2 py-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing p-1 hover:bg-accent rounded"
+              >
+                <IconGripVertical className="size-4 text-muted-foreground" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Drag to reorder</TooltipContent>
+          </Tooltip>
           <CardTitle className="text-sm font-medium flex-1 truncate">
             {list.name}
           </CardTitle>
@@ -100,11 +103,16 @@ export function KanbanList({ list, boardId, isDragging, isOver }: KanbanListProp
             {list.cards?.length ?? 0}
           </span>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-6">
-                <IconDotsVertical className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="size-6">
+                    <IconDotsVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>List options</TooltipContent>
+            </Tooltip>
             <DropdownMenuContent align="end">
               <DropdownMenuItem disabled>
                 <IconEdit className="size-4 mr-2" />
@@ -131,10 +139,10 @@ export function KanbanList({ list, boardId, isDragging, isOver }: KanbanListProp
         </div>
       </CardHeader>
 
-      <CardContent className="p-2 pt-0 flex-1 overflow-hidden flex flex-col">
-        <ScrollArea className="flex-1 -mx-2 px-2">
+      <CardContent className="px-1.5 pb-1.5 pt-0 flex-1 overflow-hidden flex flex-col">
+        <ScrollArea className="flex-1 -mx-1.5 px-1.5">
           <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {sortedCards.map((card) => (
                 <KanbanCard key={card.id} card={card} />
               ))}
@@ -142,20 +150,22 @@ export function KanbanList({ list, boardId, isDragging, isOver }: KanbanListProp
           </SortableContext>
         </ScrollArea>
 
-        <div className="mt-2 pt-2 border-t flex-shrink-0">
-          {isCreatingCard ? (
-            <CreateCardForm listId={list.id} boardId={boardId} onCancel={closeCreateCard} />
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-muted-foreground"
-              onClick={() => openCreateCard(list.id)}
-            >
-              <IconPlus className="size-4 mr-2" />
-              Add Card
-            </Button>
-          )}
+        <div className="mt-1 pt-1 border-t flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground"
+            onClick={() => setCreateCardOpen(true)}
+          >
+            <IconPlus className="size-4 mr-2" />
+            Add Card
+          </Button>
+          <CreateCardDialog
+            listId={list.id}
+            boardId={boardId}
+            open={createCardOpen}
+            onOpenChange={setCreateCardOpen}
+          />
         </div>
       </CardContent>
     </Card>

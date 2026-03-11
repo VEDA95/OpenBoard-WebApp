@@ -15,12 +15,12 @@ import { Textarea } from '@components/ui/textarea';
 import { Checkbox } from '@components/ui/checkbox';
 import { createWorkspace } from '@lib/fetch/workspaces';
 import { QueryKeys } from '@lib/queries/queryKeys';
-import { useKanbanStore } from '@lib/stores/kanban-store';
+import { useModalState } from '@lib/state/modal';
 import type { CreateWorkspacePayload } from '@appTypes/board';
 
 export function CreateWorkspaceDialog() {
   const queryClient = useQueryClient();
-  const { modal, closeCreateWorkspace } = useKanbanStore();
+  const { createWorkspaceOpen, closeCreateWorkspace } = useModalState();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
@@ -52,7 +52,7 @@ export function CreateWorkspaceDialog() {
   }
 
   return (
-    <Dialog open={modal.createWorkspaceOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={createWorkspaceOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>

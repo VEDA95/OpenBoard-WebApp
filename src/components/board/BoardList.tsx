@@ -1,59 +1,19 @@
 import { Link } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
 import { IconLayoutKanban, IconPlus, IconLock, IconWorld } from '@tabler/icons-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { Button } from '@components/ui/button';
-import { Skeleton } from '@components/ui/skeleton';
-import { getBoardsByWorkspace } from '@lib/fetch/boards';
-import { QueryKeys } from '@lib/queries/queryKeys';
-import { useKanbanStore } from '@lib/stores/kanban-store';
-import { transformBoard } from '@appTypes/board';
+import { useModalState } from '@lib/state/modal';
+import type { Board } from '@appTypes/board';
 
 interface BoardListProps {
   workspaceId: string;
+  boards: Board[];
 }
 
-export function BoardList({ workspaceId }: BoardListProps) {
-  const { openCreateBoard } = useKanbanStore();
+export function BoardList({ workspaceId, boards }: BoardListProps) {
+  const { openCreateBoard } = useModalState();
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: QueryKeys.boards.list(workspaceId),
-    queryFn: async () => {
-      const response = await getBoardsByWorkspace(workspaceId);
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to fetch boards');
-      }
-      return response.data?.map(transformBoard) ?? [];
-    },
-  });
-
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-6 w-3/4" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-4 w-1/2" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">Failed to load boards</p>
-        <p className="text-sm text-destructive">{error.message}</p>
-      </div>
-    );
-  }
-
-  if (!data || data.length === 0) {
+  if (boards.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <IconLayoutKanban className="size-16 text-muted-foreground/50 mb-4" />
@@ -71,7 +31,7 @@ export function BoardList({ workspaceId }: BoardListProps) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {data.map((board) => (
+      {boards.map((board) => (
         <Link
           key={board.id}
           to="/dashboard/workspaces/$workspaceId/boards/$boardId"

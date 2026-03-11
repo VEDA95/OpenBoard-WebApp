@@ -34,10 +34,6 @@ export interface WebSocketMessage<T = unknown> {
   data?: T;
 }
 
-export interface AuthMessage {
-  access_token: string;
-}
-
 export interface SubscribeMessage {
   type: 'subscribe' | 'unsubscribe';
   topic: string;

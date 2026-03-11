@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import type { Card, List } from "@appTypes/board";
 
 export interface ModalState {
   cardDetailOpen: boolean;
@@ -33,7 +32,7 @@ export interface ModalState {
   closeDeleteConfirm: () => void;
 }
 
-export const useModalState = create<ModalState>({
+export const useModalState = create<ModalState>((set) => ({
   cardDetailOpen: false,
   cardDetailId: null,
   createListOpen: false,
@@ -47,77 +46,31 @@ export const useModalState = create<ModalState>({
   deleteConfirmType: null,
   deleteConfirmId: null,
   openCardDetail: (cardId) =>
-    set((state) => ({
-      modal: { ...state.modal, cardDetailOpen: true, cardDetailId: cardId },
-    })),
+    set({ cardDetailOpen: true, cardDetailId: cardId }),
   closeCardDetail: () =>
-    set((state) => ({
-      modal: { ...state.modal, cardDetailOpen: false, cardDetailId: null },
-    })),
+    set({ cardDetailOpen: false, cardDetailId: null }),
   openCreateList: () =>
-    set((state) => ({
-      modal: { ...state.modal, createListOpen: true },
-    })),
+    set({ createListOpen: true }),
   closeCreateList: () =>
-    set((state) => ({
-      modal: { ...state.modal, createListOpen: false },
-    })),
+    set({ createListOpen: false }),
   openCreateCard: (listId) =>
-    set((state) => ({
-      modal: { ...state.modal, createCardListId: listId },
-    })),
+    set({ createCardListId: listId }),
   closeCreateCard: () =>
-    set((state) => ({
-      modal: { ...state.modal, createCardListId: null },
-    })),
+    set({ createCardListId: null }),
   openCreateWorkspace: () =>
-    set((state) => ({
-      modal: { ...state.modal, createWorkspaceOpen: true },
-    })),
+    set({ createWorkspaceOpen: true }),
   closeCreateWorkspace: () =>
-    set((state) => ({
-      modal: { ...state.modal, createWorkspaceOpen: false },
-    })),
+    set({ createWorkspaceOpen: false }),
   openCreateBoard: (workspaceId) =>
-    set((state) => ({
-      modal: {
-        ...state.modal,
-        createBoardOpen: true,
-        createBoardWorkspaceId: workspaceId,
-      },
-    })),
+    set({ createBoardOpen: true, createBoardWorkspaceId: workspaceId }),
   closeCreateBoard: () =>
-    set((state) => ({
-      modal: {
-        ...state.modal,
-        createBoardOpen: false,
-        createBoardWorkspaceId: null,
-      },
-    })),
+    set({ createBoardOpen: false, createBoardWorkspaceId: null }),
   openEditLabel: (labelId) =>
-    set((state) => ({
-      modal: { ...state.modal, editLabelOpen: true, editLabelId: labelId },
-    })),
+    set({ editLabelOpen: true, editLabelId: labelId }),
   closeEditLabel: () =>
-    set((state) => ({
-      modal: { ...state.modal, editLabelOpen: false, editLabelId: null },
-    })),
+    set({ editLabelOpen: false, editLabelId: null }),
   openDeleteConfirm: (type, id) =>
-    set((state) => ({
-      modal: {
-        ...state.modal,
-        deleteConfirmOpen: true,
-        deleteConfirmType: type,
-        deleteConfirmId: id,
-      },
-    })),
+    set({ deleteConfirmOpen: true, deleteConfirmType: type, deleteConfirmId: id }),
   closeDeleteConfirm: () =>
-    set((state) => ({
-      modal: {
-        ...state.modal,
-        deleteConfirmOpen: false,
-        deleteConfirmType: null,
-        deleteConfirmId: null,
-      },
-    })),
-});
+    set({ deleteConfirmOpen: false, deleteConfirmType: null, deleteConfirmId: null }),
+}));

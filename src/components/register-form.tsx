@@ -68,7 +68,7 @@ export function RegistrationForm(): ReactElement<FC> {
                   value={username}
                   disabled={disabled}
                   onChange={handleChange}
-                  placeholder="type email address here..."
+                  placeholder="type username here..."
                   required />
               </Field>
               <Field>
@@ -80,7 +80,7 @@ export function RegistrationForm(): ReactElement<FC> {
                   value={email}
                   disabled={disabled}
                   onChange={handleChange}
-                  placeholder="type username here..."
+                  placeholder="type email address here..."
                   required />
               </Field>
               <Field>

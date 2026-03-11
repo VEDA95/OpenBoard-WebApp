@@ -6,17 +6,17 @@ import { Button } from '@components/ui/button';
 import { Skeleton } from '@components/ui/skeleton';
 import { getWorkspaces } from '@lib/fetch/workspaces';
 import { QueryKeys } from '@lib/queries/queryKeys';
-import { useKanbanStore } from '@lib/stores/kanban-store';
+import { useModalState } from '@lib/state/modal';
 import { transformWorkspace } from '@appTypes/board';
 
 export function WorkspaceList() {
-  const { openCreateWorkspace } = useKanbanStore();
+  const { openCreateWorkspace } = useModalState();
 
   const { data, isLoading, error } = useQuery({
     queryKey: QueryKeys.workspaces.list(),
     queryFn: async () => {
       const response = await getWorkspaces();
-      if (response.status !== 200) {
+      if (response.code !== 200) {
         throw new Error(response.message || 'Failed to fetch workspaces');
       }
       return response.data?.map(transformWorkspace) ?? [];

@@ -4,7 +4,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { IconCalendar, IconMessage, IconCheckbox } from '@tabler/icons-react';
 import { Card, CardContent } from '@components/ui/card';
 import { Badge } from '@components/ui/badge';
-import { useKanbanStore } from '@lib/stores/kanban-store';
+import { useModalState } from '@lib/state/modal';
 import type { Card as CardType } from '@appTypes/board';
 import { cn } from '@lib/utils/cn';
 
@@ -15,7 +15,7 @@ interface KanbanCardProps {
 
 export function KanbanCard({ card, isDragging }: KanbanCardProps) {
   const navigate = useNavigate();
-  const { openCardDetail } = useKanbanStore();
+  const { openCardDetail } = useModalState();
 
   const {
     attributes,
@@ -64,15 +64,15 @@ export function KanbanCard({ card, isDragging }: KanbanCardProps) {
       {...listeners}
       onClick={handleClick}
       className={cn(
-        'cursor-pointer hover:ring-2 hover:ring-primary/50 transition-shadow',
+        'cursor-pointer hover:ring-2 hover:ring-primary/50 transition-shadow py-0 gap-0',
         (isDragging || isSortableDragging) && 'opacity-50 shadow-lg',
         card.color && 'border-l-4',
       )}
       data-color={card.color}
     >
-      <CardContent className="p-3">
+      <CardContent className="px-2 py-1.5">
         {hasLabels && (
-          <div className="flex flex-wrap gap-1 mb-2">
+          <div className="flex flex-wrap gap-1 mb-1">
             {card.labels?.slice(0, 3).map((label) => (
               <Badge
                 key={label.id}
@@ -100,7 +100,7 @@ export function KanbanCard({ card, isDragging }: KanbanCardProps) {
         )}
 
         {(hasDueDate || hasComments || hasChecklist) && (
-          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2.5 mt-1 text-xs text-muted-foreground">
             {hasDueDate && (
               <div
                 className={cn(

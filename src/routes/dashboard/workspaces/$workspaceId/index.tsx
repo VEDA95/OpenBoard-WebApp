@@ -19,8 +19,8 @@ function WorkspacePage() {
     queryKey: QueryKeys.workspaces.detail(workspaceId),
     queryFn: async () => {
       const response = await getWorkspace(workspaceId);
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to fetch workspace');
+      if (response.code !== 200) {
+        throw new Error(response.message ?? 'Failed to fetch workspace');
       }
       return response.data ? transformWorkspace(response.data) : null;
     },
@@ -75,7 +75,7 @@ function WorkspacePage() {
 
       <div>
         <h2 className="text-lg font-semibold mb-4">Boards</h2>
-        <BoardList workspaceId={workspaceId} />
+        <BoardList workspaceId={workspaceId} boards={workspace.boards ?? []} />
       </div>
     </div>
   );

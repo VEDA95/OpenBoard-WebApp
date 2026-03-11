@@ -1,6 +1,5 @@
 import type {
   WebSocketMessage,
-  AuthMessage,
   SubscribeMessage,
   ConnectionStatus,
 } from './types';
@@ -11,7 +10,6 @@ type StatusHandler = (status: ConnectionStatus) => void;
 export class WebSocketClient {
   private ws: WebSocket | null = null;
   private url: string;
-  private accessToken: string | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
@@ -34,12 +32,11 @@ export class WebSocketClient {
     return this.status;
   }
 
-  connect(accessToken: string) {
+  connect() {
     if (this.ws?.readyState === WebSocket.OPEN) {
       return;
     }
 
-    this.accessToken = accessToken;
     this.setStatus('connecting');
 
     try {
@@ -47,8 +44,8 @@ export class WebSocketClient {
 
       this.ws.onopen = () => {
         this.reconnectAttempts = 0;
-        // Authenticate immediately after connection
-        this.authenticate();
+        this.setStatus('connected');
+        this.resubscribeToTopics();
       };
 
       this.ws.onmessage = (event) => {
@@ -74,24 +71,11 @@ export class WebSocketClient {
     }
   }
 
-  private authenticate() {
-    if (!this.ws || !this.accessToken) return;
-
-    const authMessage: AuthMessage = {
-      access_token: this.accessToken,
-    };
-    this.ws.send(JSON.stringify(authMessage));
-  }
-
   private handleMessage(message: WebSocketMessage) {
-    // Handle auth response
+    // Handle auth messages from session checker
     if (message.type === 'auth') {
-      if (message.message?.includes('successful')) {
-        this.setStatus('connected');
-        // Re-subscribe to previous topics after reconnect
-        this.resubscribeToTopics();
-      } else {
-        console.error('WebSocket auth failed:', message.message);
+      if (!message.message?.includes('successful')) {
+        console.error('WebSocket auth expired:', message.message);
         this.setStatus('disconnected');
       }
       return;
@@ -112,10 +96,6 @@ export class WebSocketClient {
       return;
     }
 
-    if (!this.accessToken) {
-      return;
-    }
-
     this.setStatus('reconnecting');
     this.reconnectAttempts++;
 
@@ -123,7 +103,7 @@ export class WebSocketClient {
 
     this.reconnectTimeout = setTimeout(() => {
       console.log(`Attempting to reconnect (attempt ${this.reconnectAttempts})`);
-      this.connect(this.accessToken!);
+      this.connect();
     }, delay);
   }
 
@@ -195,7 +175,6 @@ export class WebSocketClient {
     }
 
     this.subscribedTopics.clear();
-    this.accessToken = null;
     this.reconnectAttempts = 0;
     this.setStatus('disconnected');
   }

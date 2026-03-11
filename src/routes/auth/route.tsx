@@ -31,11 +31,25 @@ const fetchAuthSettingsFunc = createServerFn({ method: 'GET' }).handler(async ()
     getEnabledProviders(requestHeaders)
   ]);
 
-  const authSettings = isPublic
-    ? parsePublicAuthSettings((authSettingsResponse as APIResponse<PublicAuthSettingsResponse>).data as PublicAuthSettingsResponse)
-    : parseAuthSettings((authSettingsResponse as APIResponse<AuthSettingsResponse>).data as AuthSettingsResponse);
+  const authSettingsData = authSettingsResponse?.data;
+  let authSettings: AuthSettings | PublicAuthSettings;
 
-  const oauthProviders = oauthProvidersResponse.data
+  if (authSettingsData == null) {
+    authSettings = {
+      allowPublicRegistration: true,
+      requireEmailVerfication: false,
+      allowUserInvitations: false,
+      invitationOnlyMode: false,
+      twoFactorAuthentication: false,
+      twoFactorAuthRequired: false,
+    } as PublicAuthSettings;
+  } else if (isPublic) {
+    authSettings = parsePublicAuthSettings(authSettingsData as PublicAuthSettingsResponse);
+  } else {
+    authSettings = parseAuthSettings(authSettingsData as AuthSettingsResponse);
+  }
+
+  const oauthProviders = oauthProvidersResponse?.data
     ? parseOAuthProviders(oauthProvidersResponse.data)
     : [];
 

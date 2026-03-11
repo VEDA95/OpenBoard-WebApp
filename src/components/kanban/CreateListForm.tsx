@@ -1,35 +1,42 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { IconX } from '@tabler/icons-react';
-import { Card, CardContent } from '@components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@components/ui/dialog';
 import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
 import { Button } from '@components/ui/button';
 import { createList } from '@lib/fetch/lists';
 import { QueryKeys } from '@lib/queries/queryKeys';
 import type { CreateListPayload } from '@appTypes/board';
 
-interface CreateListFormProps {
+interface CreateListDialogProps {
   boardId: string;
-  onCancel: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function CreateListForm({ boardId, onCancel }: CreateListFormProps) {
+export function CreateListDialog({ boardId, open, onOpenChange }: CreateListDialogProps) {
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
 
   const createMutation = useMutation({
     mutationFn: (data: CreateListPayload) => createList(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QueryKeys.lists.byBoard(boardId) });
-      setName('');
-      inputRef.current?.focus();
+      handleClose();
     },
   });
+
+  function handleClose() {
+    setName('');
+    onOpenChange(false);
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,44 +48,38 @@ export function CreateListForm({ boardId, onCancel }: CreateListFormProps) {
     });
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Escape') {
-      onCancel();
-    }
-  }
-
   return (
-    <Card className="w-72 flex-shrink-0 bg-muted/50">
-      <CardContent className="p-3">
+    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+      <DialogContent>
         <form onSubmit={handleSubmit}>
-          <Input
-            ref={inputRef}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Enter list name..."
-            className="mb-2"
-          />
-          <div className="flex items-center gap-2">
-            <Button
-              type="submit"
-              size="sm"
-              disabled={!name.trim() || createMutation.isPending}
-            >
+          <DialogHeader>
+            <DialogTitle>Add List</DialogTitle>
+            <DialogDescription>
+              Add a new list to this board.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="list-name">Name</Label>
+              <Input
+                id="list-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="List name"
+                autoFocus
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!name.trim() || createMutation.isPending}>
               {createMutation.isPending ? 'Adding...' : 'Add List'}
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              onClick={onCancel}
-            >
-              <IconX className="size-4" />
-            </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }

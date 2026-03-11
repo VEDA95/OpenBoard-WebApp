@@ -57,7 +57,7 @@ export type BoardResponse = BaseResponse & {
 
 export type CreateBoardPayload = {
   name: string;
-  workspace_id: string;
+  workspace: string;
   is_public?: boolean;
 };
 

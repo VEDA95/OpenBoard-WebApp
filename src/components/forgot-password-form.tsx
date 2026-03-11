@@ -3,14 +3,25 @@ import { Field, FieldLabel, FieldGroup } from '@components/ui/field';
 import { Input } from '@components/ui/input';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@components/ui/card';
 import { Button } from '@components/ui/button';
-import type { ReactElement, FC, ComponentProps, FormEvent } from 'react';
+import { forgotPasswordStart } from '@lib/fetch/auth';
+import type { ReactElement, FC, FormEvent } from 'react';
 
 export function ForgotPasswordForm(): ReactElement<FC> {
   const emailRef = useRef<HTMLInputElement>(null);
   const [disabled, setDisabled] = useState<boolean>(false);
+  const [message, setMessage] = useState<string | null>(null);
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     setDisabled(true);
+    setMessage(null);
+    (async (): Promise<void> => {
+      const response = await forgotPasswordStart(emailRef.current?.value || '');
+      if (response.code === 200 || response.code === 201) {
+        setMessage('If an account with that email exists, a reset link has been sent.');
+      } else {
+        setDisabled(false);
+      }
+    })();
   };
 
   return (
@@ -35,8 +46,11 @@ export function ForgotPasswordForm(): ReactElement<FC> {
                   placeholder="type email here..."
                   required />
               </Field>
+              {message && (
+                <p className="text-sm text-muted-foreground text-center">{message}</p>
+              )}
               <Field>
-                <Button type="submit">Send Reset Email</Button>
+                <Button type="submit" disabled={disabled}>Send Reset Email</Button>
               </Field>
             </FieldGroup>
           </form>

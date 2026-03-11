@@ -29,8 +29,8 @@ export function CardChecklistSection({ card, boardId }: CardChecklistSectionProp
     queryKey: QueryKeys.checklistItems.byCard(card.id),
     queryFn: async () => {
       const response = await getChecklistItemsByCard(card.id);
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to fetch checklist items');
+      if (response.code !== 200) {
+        throw new Error(response.message ?? 'Failed to fetch checklist items');
       }
       return response.data?.map(transformChecklistItem).sort((a, b) => a.position - b.position) ?? [];
     },

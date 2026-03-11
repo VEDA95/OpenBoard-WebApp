@@ -20,7 +20,7 @@ import { CardCommentsSection } from './CardDetailSections/CardCommentsSection';
 import { CardDueDateSection } from './CardDetailSections/CardDueDateSection';
 import { getCard, deleteCard } from '@lib/fetch/cards';
 import { QueryKeys } from '@lib/queries/queryKeys';
-import { useKanbanStore } from '@lib/stores/kanban-store';
+import { useModalState } from '@lib/state/modal';
 import { transformCard } from '@appTypes/board';
 
 interface CardDetailModalProps {
@@ -30,27 +30,26 @@ interface CardDetailModalProps {
 export function CardDetailModal({ boardId }: CardDetailModalProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { modal, closeCardDetail } = useKanbanStore();
+  const { cardDetailId, cardDetailOpen, closeCardDetail } = useModalState();
   const search = useSearch({ strict: false }) as { card?: string };
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const cardId = modal.cardDetailId || search.card;
-  const isOpen = modal.cardDetailOpen || !!search.card;
+  const cardId = cardDetailId;
 
-  // Sync URL with modal state
+  // Sync URL search param → zustand (only reacts to URL changes, not zustand)
   useEffect(() => {
-    if (search.card && !modal.cardDetailOpen) {
-      useKanbanStore.getState().openCardDetail(search.card);
+    if (search.card) {
+      useModalState.getState().openCardDetail(search.card);
     }
-  }, [search.card, modal.cardDetailOpen]);
+  }, [search.card]);
 
   const { data: card, isLoading, error } = useQuery({
     queryKey: QueryKeys.cards.detail(cardId ?? ''),
     queryFn: async () => {
       if (!cardId) return null;
       const response = await getCard(cardId);
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to fetch card');
+      if (response.code !== 200) {
+        throw new Error(response.message ?? 'Failed to fetch card');
       }
       return response.data ? transformCard(response.data) : null;
     },
@@ -78,9 +77,9 @@ export function CardDetailModal({ boardId }: CardDetailModalProps) {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-0 flex-shrink-0">
+    <Dialog open={cardDetailOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0" showCloseButton={false}>
+        <DialogHeader className="p-4 pb-0 flex-shrink-0">
           <div className="flex items-start justify-between gap-4">
             <DialogTitle className="sr-only">Card Details</DialogTitle>
             <div className="flex-1">
@@ -92,7 +91,7 @@ export function CardDetailModal({ boardId }: CardDetailModalProps) {
                 <span className="text-muted-foreground">Card not found</span>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
@@ -122,7 +121,7 @@ export function CardDetailModal({ boardId }: CardDetailModalProps) {
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 p-6 pt-4">
+        <ScrollArea className="flex-1 p-4 pt-3">
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-24 w-full" />

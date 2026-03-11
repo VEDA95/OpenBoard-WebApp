@@ -7,7 +7,7 @@ export interface SelectionState {
   selectCards: (cardIds: Array<string>) => void;
 }
 
-export const useSelectionState = create<SelectionState>({
+export const useSelectionState = create<SelectionState>((set) => ({
   selectedCardIds: new Set(),
   toggleCardSelection: (cardId) =>
     set((state) => {
@@ -21,4 +21,4 @@ export const useSelectionState = create<SelectionState>({
     }),
   clearCardSelection: () => set({ selectedCardIds: new Set() }),
   selectCards: (cardIds) => set({ selectedCardIds: new Set(cardIds) }),
-});
+}));

@@ -1,3 +1,4 @@
+import { API_BASE } from './client';
 import type { APIResponse } from '@appTypes/response';
 import type {
   GeneralSettingsResponse,
@@ -9,7 +10,7 @@ import type {
 } from '@appTypes/settings';
 
 export async function GETGeneralSettings(publicSettings: boolean = false, headers?: Headers): Promise<APIResponse<GeneralSettingsResponse> | APIResponse<PublicGeneralSettingsResponse>> {
-  let url: string = 'http://localhost:8080/api/settings/general';
+  let url: string = `${API_BASE}/api/settings/general`;
 
   if (publicSettings) url += '/public';
 
@@ -23,7 +24,7 @@ export async function GETGeneralSettings(publicSettings: boolean = false, header
 }
 
 export async function GETAuthSettings(publicSettings: boolean = false, headers?: Headers): Promise<APIResponse<AuthSettingsResponse> | APIResponse<PublicAuthSettingsResponse>> {
-  let url: string = 'http://localhost:8080/api/settings/auth';
+  let url: string = `${API_BASE}/api/settings/auth`;
 
   if (publicSettings) url += '/public';
 
@@ -37,7 +38,7 @@ export async function GETAuthSettings(publicSettings: boolean = false, headers?:
 }
 
 export async function GETEmailSettings(publicSettings: boolean = false, headers?: Headers): Promise<APIResponse<EmailSettingsResponse> | APIResponse<PublicEmailSettingsResponse>> {
-  let url: string = 'http://localhost:8080/api/settings/email';
+  let url: string = `${API_BASE}/api/settings/email`;
 
   if (publicSettings) url += '/public';
 

@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { ReactElement, FC, Context, PropsWithChildren } from 'react';
+import type { ReactElement, FC, PropsWithChildren } from 'react';
 import type { AuthPageContextType } from '@appTypes/auth';
 
 export interface AuthPageProviderProps extends PropsWithChildren {

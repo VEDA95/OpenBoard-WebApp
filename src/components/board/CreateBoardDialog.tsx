@@ -14,22 +14,22 @@ import { Label } from '@components/ui/label';
 import { Checkbox } from '@components/ui/checkbox';
 import { createBoard } from '@lib/fetch/boards';
 import { QueryKeys } from '@lib/queries/queryKeys';
-import { useKanbanStore } from '@lib/stores/kanban-store';
+import { useModalState } from '@lib/state/modal';
 import type { CreateBoardPayload } from '@appTypes/board';
 
 export function CreateBoardDialog() {
   const queryClient = useQueryClient();
-  const { modal, closeCreateBoard } = useKanbanStore();
+  const { createBoardOpen, createBoardWorkspaceId, closeCreateBoard } = useModalState();
   const [name, setName] = useState('');
   const [isPublic, setIsPublic] = useState(true);
 
-  const workspaceId = modal.createBoardWorkspaceId;
+  const workspaceId = createBoardWorkspaceId;
 
   const createMutation = useMutation({
     mutationFn: (data: CreateBoardPayload) => createBoard(data),
     onSuccess: () => {
       if (workspaceId) {
-        queryClient.invalidateQueries({ queryKey: QueryKeys.boards.list(workspaceId) });
+        queryClient.invalidateQueries({ queryKey: QueryKeys.workspaces.detail(workspaceId) });
       }
       handleClose();
     },
@@ -47,13 +47,13 @@ export function CreateBoardDialog() {
 
     createMutation.mutate({
       name: name.trim(),
-      workspace_id: workspaceId,
+      workspace: workspaceId,
       is_public: isPublic,
     });
   }
 
   return (
-    <Dialog open={modal.createBoardOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={createBoardOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>

@@ -1,12 +1,9 @@
-import type { APICollectionResponse, APIResponse } from '@appTypes/response';
+import { publicClient, API_BASE } from './client';
+import type { APICollectionResponse } from '@appTypes/response';
 import type { OAuthProviderResponse } from '@appTypes/oauth';
-import type { LoggedInResponse } from '@appTypes/auth';
-
-const API_BASE_URL = 'http://localhost:8080';
 
 export async function getEnabledProviders(headers?: Headers): Promise<APICollectionResponse<OAuthProviderResponse>> {
-  const response: Response = await fetch(`${API_BASE_URL}/auth/oauth/providers/enabled`, {
-    method: 'GET',
+  const response: Response = await publicClient.get('/auth/oauth/providers/enabled', {
     credentials: 'include',
     headers: headers
   });
@@ -16,7 +13,7 @@ export async function getEnabledProviders(headers?: Headers): Promise<APICollect
 
 export function getOAuthAuthorizeUrl(providerId: string, redirectUrl: string): string {
   const encodedRedirectUrl = encodeURIComponent(redirectUrl);
-  return `${API_BASE_URL}/auth/oauth/authorize/${providerId}?redirect_url=${encodedRedirectUrl}`;
+  return `${API_BASE}/auth/oauth/authorize/${providerId}?redirect_url=${encodedRedirectUrl}`;
 }
 
 export function initiateOAuthFlow(providerId: string, redirectUrl: string): void {
@@ -34,8 +31,7 @@ export async function exchangeOAuthCode(
   providerId: string,
   payload: OAuthTokenExchangePayload
 ): Promise<Response> {
-  const response: Response = await fetch(`${API_BASE_URL}/auth/oauth/callback/${providerId}`, {
-    method: 'POST',
+  const response: Response = await publicClient.post(`/auth/oauth/callback/${providerId}`, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json'

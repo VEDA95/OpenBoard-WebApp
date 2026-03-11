@@ -24,7 +24,7 @@ import { ScrollArea, ScrollBar } from '@components/ui/scroll-area';
 import { Skeleton } from '@components/ui/skeleton';
 import { KanbanList } from './KanbanList';
 import { KanbanCard } from './KanbanCard';
-import { CreateListForm } from './CreateListForm';
+import { CreateListDialog } from './CreateListForm';
 import { CardDetailModal } from './CardDetailModal';
 import { ConnectionStatus } from '@components/ui/connection-status';
 import { useBoardSubscription } from '@/hooks/useWebSocket';
@@ -33,7 +33,8 @@ import { getListsByBoard } from '@lib/fetch/lists';
 import { moveCard, updateCard } from '@lib/fetch/cards';
 import { updateList } from '@lib/fetch/lists';
 import { QueryKeys } from '@lib/queries/queryKeys';
-import { useKanbanStore } from '@lib/stores/kanban-store';
+import { useModalState } from '@lib/state/modal';
+import { useDragState } from '@lib/state/drag';
 import { transformBoard, transformList, type List, type Card } from '@appTypes/board';
 
 interface BoardViewProps {
@@ -44,15 +45,19 @@ interface BoardViewProps {
 export function BoardView({ boardId, workspaceId }: BoardViewProps) {
   const queryClient = useQueryClient();
   const {
-    drag,
+    activeCard,
+    activeList,
+    overListId,
     setActiveCard,
     setActiveList,
     setOverListId,
     resetDragState,
-    modal,
+  } = useDragState();
+  const {
+    createListOpen,
     openCreateList,
     closeCreateList,
-  } = useKanbanStore();
+  } = useModalState();
 
   // Subscribe to board WebSocket events
   useBoardSubscription(boardId);
@@ -70,8 +75,8 @@ export function BoardView({ boardId, workspaceId }: BoardViewProps) {
     queryKey: QueryKeys.boards.detail(boardId),
     queryFn: async () => {
       const response = await getBoard(boardId);
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to fetch board');
+      if (response.code !== 200) {
+        throw new Error(response.message ?? 'Failed to fetch board');
       }
       return response.data ? transformBoard(response.data) : null;
     },
@@ -81,8 +86,8 @@ export function BoardView({ boardId, workspaceId }: BoardViewProps) {
     queryKey: QueryKeys.lists.byBoard(boardId),
     queryFn: async () => {
       const response = await getListsByBoard(boardId);
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to fetch lists');
+      if (response.code !== 200) {
+        throw new Error(response.message ?? 'Failed to fetch lists');
       }
       return response.data?.map(transformList).sort((a, b) => a.position - b.position) ?? [];
     },
@@ -99,8 +104,8 @@ export function BoardView({ boardId, workspaceId }: BoardViewProps) {
       position: number;
     }) => {
       const response = await moveCard(cardId, { list_id: listId, position });
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to move card');
+      if (response.code !== 200) {
+        throw new Error(response.message ?? 'Failed to move card');
       }
       return response.data;
     },
@@ -110,12 +115,16 @@ export function BoardView({ boardId, workspaceId }: BoardViewProps) {
   });
 
   const reorderListMutation = useMutation({
-    mutationFn: async ({ listId, position }: { listId: string; position: number }) => {
-      const response = await updateList(listId, { position });
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to reorder list');
+    mutationFn: async ({ reorderedLists }: { reorderedLists: List[] }) => {
+      const updates = reorderedLists.map((list, index) =>
+        updateList(list.id, { position: index + 1 })
+      );
+      const results = await Promise.all(updates);
+      for (const response of results) {
+        if (response.code !== 200) {
+          throw new Error(response.message ?? 'Failed to reorder list');
+        }
       }
-      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QueryKeys.lists.byBoard(boardId) });
@@ -202,10 +211,7 @@ export function BoardView({ boardId, workspaceId }: BoardViewProps) {
           const newLists = arrayMove(lists, oldIndex, newIndex);
           queryClient.setQueryData(QueryKeys.lists.byBoard(boardId), newLists);
 
-          reorderListMutation.mutate({
-            listId: activeId,
-            position: newIndex,
-          });
+          reorderListMutation.mutate({ reorderedLists: newLists });
         }
       }
     } else if (active.data.current?.type === 'card') {
@@ -289,39 +295,40 @@ export function BoardView({ boardId, workspaceId }: BoardViewProps) {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <div className="flex gap-4 items-start h-full">
+            <div className="flex gap-3 items-start h-full">
               <SortableContext items={listIds} strategy={horizontalListSortingStrategy}>
                 {lists?.map((list) => (
                   <KanbanList
                     key={list.id}
                     list={list}
                     boardId={boardId}
-                    isOver={drag.overListId === list.id}
+                    isOver={overListId === list.id}
                   />
                 ))}
               </SortableContext>
 
-              {modal.createListOpen ? (
-                <CreateListForm boardId={boardId} onCancel={closeCreateList} />
-              ) : (
-                <Button
-                  variant="outline"
-                  className="w-72 flex-shrink-0 h-auto py-3 justify-start"
-                  onClick={openCreateList}
-                >
-                  <IconPlus className="size-4 mr-2" />
-                  Add List
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                className="w-72 flex-shrink-0 h-auto py-3 justify-start"
+                onClick={openCreateList}
+              >
+                <IconPlus className="size-4 mr-2" />
+                Add List
+              </Button>
+              <CreateListDialog
+                boardId={boardId}
+                open={createListOpen}
+                onOpenChange={(open) => !open && closeCreateList()}
+              />
             </div>
 
             <DragOverlay>
-              {drag.activeCard && (
-                <KanbanCard card={drag.activeCard} isDragging />
+              {activeCard && (
+                <KanbanCard card={activeCard} isDragging />
               )}
-              {drag.activeList && (
+              {activeList && (
                 <KanbanList
-                  list={drag.activeList}
+                  list={activeList}
                   boardId={boardId}
                   isDragging
                 />

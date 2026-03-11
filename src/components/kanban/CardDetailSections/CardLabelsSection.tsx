@@ -42,8 +42,8 @@ export function CardLabelsSection({ card, boardId }: CardLabelsSectionProps) {
     queryKey: QueryKeys.labels.byBoard(boardId),
     queryFn: async () => {
       const response = await getLabelsByBoard(boardId);
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to fetch labels');
+      if (response.code !== 200) {
+        throw new Error(response.message ?? 'Failed to fetch labels');
       }
       return response.data?.map(transformLabel) ?? [];
     },

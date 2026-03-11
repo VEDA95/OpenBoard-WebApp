@@ -1,3 +1,4 @@
+import { apiClient } from './client';
 import type { APIResponse } from '@appTypes/response';
 import type {
   BoardResponse,
@@ -5,72 +6,46 @@ import type {
   UpdateBoardPayload,
 } from '@appTypes/board';
 
-const API_BASE = 'http://localhost:8080';
-
 export async function getBoards(): Promise<APIResponse<BoardResponse[]>> {
-  const response = await fetch(`${API_BASE}/boards`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  const response = await apiClient.get('/api/boards', {
+    headers: { 'Content-Type': 'application/json' },
   });
   return await response.json();
 }
 
 export async function getBoardsByWorkspace(workspaceId: string): Promise<APIResponse<BoardResponse[]>> {
-  const response = await fetch(`${API_BASE}/boards?workspace_id=${workspaceId}`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  const response = await apiClient.get(`/api/boards?workspace_id=${workspaceId}`, {
+    headers: { 'Content-Type': 'application/json' },
   });
   return await response.json();
 }
 
 export async function getBoard(id: string): Promise<APIResponse<BoardResponse>> {
-  const response = await fetch(`${API_BASE}/boards/${id}`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  const response = await apiClient.get(`/api/boards/${id}`, {
+    headers: { 'Content-Type': 'application/json' },
   });
   return await response.json();
 }
 
 export async function createBoard(data: CreateBoardPayload): Promise<APIResponse<BoardResponse>> {
-  const response = await fetch(`${API_BASE}/boards`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  const response = await apiClient.post('/api/boards', {
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
   return await response.json();
 }
 
 export async function updateBoard(id: string, data: UpdateBoardPayload): Promise<APIResponse<BoardResponse>> {
-  const response = await fetch(`${API_BASE}/boards/${id}`, {
-    method: 'PATCH',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  const response = await apiClient.patch(`/api/boards/${id}`, {
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
   return await response.json();
 }
 
 export async function deleteBoard(id: string): Promise<APIResponse<{ message: string }>> {
-  const response = await fetch(`${API_BASE}/boards/${id}`, {
-    method: 'DELETE',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  const response = await apiClient.delete(`/api/boards/${id}`, {
+    headers: { 'Content-Type': 'application/json' },
   });
   return await response.json();
 }

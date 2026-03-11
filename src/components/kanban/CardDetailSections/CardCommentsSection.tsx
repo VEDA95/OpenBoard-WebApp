@@ -21,8 +21,8 @@ export function CardCommentsSection({ card, boardId }: CardCommentsSectionProps)
     queryKey: QueryKeys.comments.byCard(card.id),
     queryFn: async () => {
       const response = await getCommentsByCard(card.id);
-      if (response.status !== 200) {
-        throw new Error(response.message || 'Failed to fetch comments');
+      if (response.code !== 200) {
+        throw new Error(response.message ?? 'Failed to fetch comments');
       }
       return response.data?.map(transformComment).sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

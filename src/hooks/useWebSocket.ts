@@ -1,34 +1,23 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { wsClient } from '@lib/websocket/client';
 import { createWebSocketEventHandler } from '@lib/websocket/handlers';
 import { boardTopic, type ConnectionStatus } from '@lib/websocket/types';
 
-export function useWebSocket(accessToken: string | null) {
+export function useWebSocketConnection() {
   const queryClient = useQueryClient();
-  const [status, setStatus] = useState<ConnectionStatus>('disconnected');
 
   useEffect(() => {
-    if (!accessToken) {
-      wsClient.disconnect();
-      return;
-    }
-
-    // Set up event handler
     const handleEvent = createWebSocketEventHandler(queryClient);
     const unsubscribeMessage = wsClient.onMessage(handleEvent);
-    const unsubscribeStatus = wsClient.onStatusChange(setStatus);
 
-    // Connect
-    wsClient.connect(accessToken);
+    wsClient.connect();
 
     return () => {
       unsubscribeMessage();
-      unsubscribeStatus();
+      wsClient.disconnect();
     };
-  }, [accessToken, queryClient]);
-
-  return { status };
+  }, [queryClient]);
 }
 
 export function useBoardSubscription(boardId: string | null) {
